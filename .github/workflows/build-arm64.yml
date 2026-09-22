@@ -5,8 +5,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  NEXT_PUBLIC_WEBAPP_URL: http://192.168.0.45:3010
-  NEXT_PUBLIC_API_V2_URL: http://192.168.0.45:3011/api/v2
+  NEXT_PUBLIC_WEBAPP_URL: https://agenda.kuuh.art
+  NEXT_PUBLIC_API_V2_URL: https://agenda.kuuh.art/api/v2
 
 jobs:
   build-web:
@@ -71,3 +71,4 @@ jobs:
           build-args: |
             DATABASE_URL=${{ secrets.DEPLOY_DATABASE_URL }}
             DATABASE_DIRECT_URL=${{ secrets.DEPLOY_DATABASE_URL }}
+
