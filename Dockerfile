@@ -92,6 +92,8 @@ COPY --from=builder-two /calcom/apps/web/public ./apps/web/public
 COPY --from=builder-two /calcom/node_modules/.bin/prisma ./node_modules/.bin/prisma
 COPY --from=builder-two /calcom/node_modules/prisma ./node_modules/prisma
 COPY --from=builder-two /calcom/node_modules/@prisma ./node_modules/@prisma
+# The compiled .bin/prisma binary looks for this wasm file next to itself
+COPY --from=builder-two /calcom/node_modules/prisma/build/prisma_schema_build_bg.wasm ./node_modules/.bin/prisma_schema_build_bg.wasm
 COPY --from=builder-two /calcom/packages/prisma ./packages/prisma
 COPY --from=builder-two /calcom/scripts ./scripts
 RUN chmod +x scripts/*
