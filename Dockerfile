@@ -74,18 +74,32 @@ ENV NEXT_PUBLIC_WEBAPP_URL=$NEXT_PUBLIC_WEBAPP_URL \
 
 RUN scripts/replace-placeholder.sh http://NEXT_PUBLIC_WEBAPP_URL_PLACEHOLDER ${NEXT_PUBLIC_WEBAPP_URL}
 
-FROM node:20 AS runner
+FROM node:20-slim AS runner
 
 WORKDIR /calcom
 
-RUN apt-get update && apt-get install -y --no-install-recommends netcat-openbsd wget && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends netcat-openbsd wget openssl && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder-two /calcom ./
+ENV NODE_ENV=production
+
+# Standalone server output (pruned node_modules + server.js), traced by Next.js
+COPY --from=builder-two /calcom/apps/web/.next/standalone ./
+# Static assets and public files aren't included in the standalone trace
+COPY --from=builder-two /calcom/apps/web/.next/static ./apps/web/.next/static
+COPY --from=builder-two /calcom/apps/web/public ./apps/web/public
+
+# Not pulled in by the app bundle itself, but needed at runtime by start.sh (migrate deploy)
+COPY --from=builder-two /calcom/node_modules/.bin/prisma ./node_modules/.bin/prisma
+COPY --from=builder-two /calcom/node_modules/prisma ./node_modules/prisma
+COPY --from=builder-two /calcom/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder-two /calcom/packages/prisma ./packages/prisma
+COPY --from=builder-two /calcom/scripts ./scripts
+RUN chmod +x scripts/*
+
 ARG NEXT_PUBLIC_WEBAPP_URL=http://localhost:3000
 ENV NEXT_PUBLIC_WEBAPP_URL=$NEXT_PUBLIC_WEBAPP_URL \
   BUILT_NEXT_PUBLIC_WEBAPP_URL=$NEXT_PUBLIC_WEBAPP_URL
 
-ENV NODE_ENV=production
 EXPOSE 3000
 
 HEALTHCHECK --interval=30s --timeout=30s --retries=5 \
