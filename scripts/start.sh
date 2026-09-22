@@ -6,5 +6,5 @@ set -x
 scripts/replace-placeholder.sh "$BUILT_NEXT_PUBLIC_WEBAPP_URL" "$NEXT_PUBLIC_WEBAPP_URL"
 
 scripts/wait-for-it.sh ${DATABASE_HOST} -- echo "database is up"
-npx prisma migrate deploy --schema /calcom/packages/prisma/schema.prisma
+node /calcom/node_modules/prisma/build/index.js migrate deploy --schema /calcom/packages/prisma/schema.prisma
 node apps/web/server.js

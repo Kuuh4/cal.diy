@@ -88,12 +88,11 @@ COPY --from=builder-two /calcom/apps/web/.next/standalone ./
 COPY --from=builder-two /calcom/apps/web/.next/static ./apps/web/.next/static
 COPY --from=builder-two /calcom/apps/web/public ./apps/web/public
 
-# Not pulled in by the app bundle itself, but needed at runtime by start.sh (migrate deploy)
-COPY --from=builder-two /calcom/node_modules/.bin/prisma ./node_modules/.bin/prisma
+# Not pulled in by the app bundle itself, but needed at runtime by start.sh (migrate deploy).
+# Invoked as `node node_modules/prisma/build/index.js` (not via .bin/prisma) so its
+# relative requires (../package.json, its .wasm files) resolve from the real package dir.
 COPY --from=builder-two /calcom/node_modules/prisma ./node_modules/prisma
 COPY --from=builder-two /calcom/node_modules/@prisma ./node_modules/@prisma
-# The compiled .bin/prisma binary looks for this wasm file next to itself
-COPY --from=builder-two /calcom/node_modules/prisma/build/prisma_schema_build_bg.wasm ./node_modules/.bin/prisma_schema_build_bg.wasm
 COPY --from=builder-two /calcom/packages/prisma ./packages/prisma
 COPY --from=builder-two /calcom/scripts ./scripts
 RUN chmod +x scripts/*
